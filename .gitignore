@@ -1,0 +1,23 @@
+# .NET
+bin/
+obj/
+TestResults/
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# IDE and OS
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Local configuration and secrets
+.env
+.env.*
+!*.example
+appsettings.Local.json
