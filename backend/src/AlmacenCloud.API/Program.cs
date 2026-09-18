@@ -4,6 +4,7 @@ using AlmacenCloud.API.Middleware;
 using AlmacenCloud.API.Services;
 using AlmacenCloud.Application.Abstractions;
 using AlmacenCloud.Application.Features.Auth;
+using AlmacenCloud.Application.Features.Inventory;
 using AlmacenCloud.Infrastructure.Identity;
 using AlmacenCloud.Infrastructure.Persistence;
 using AlmacenCloud.Infrastructure.Repositories;
@@ -14,7 +15,8 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.SnakeCaseUpper)));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUser>());
@@ -23,6 +25,8 @@ builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IInventoryCoreRepository, InventoryCoreRepository>();
+builder.Services.AddScoped<IInventoryCoreService, InventoryCoreService>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 builder.Services.AddDbContext<AlmacenCloudDbContext>(options =>

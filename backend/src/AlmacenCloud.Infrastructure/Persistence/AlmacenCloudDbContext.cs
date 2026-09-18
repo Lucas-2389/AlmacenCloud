@@ -10,6 +10,11 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<UsuarioRol> UsuarioRoles => Set<UsuarioRol>();
+    public DbSet<Categoria> Categorias => Set<Categoria>();
+    public DbSet<Producto> Productos => Set<Producto>();
+    public DbSet<Almacen> Almacenes => Set<Almacen>();
+    public DbSet<Inventario> Inventarios => Set<Inventario>();
+    public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,6 +23,11 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
         // Fail-closed: without a valid tenant, tenant-scoped queries return no rows.
         modelBuilder.Entity<Empresa>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.Id);
         modelBuilder.Entity<Usuario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Categoria>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Producto>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Almacen>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Inventario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<MovimientoInventario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

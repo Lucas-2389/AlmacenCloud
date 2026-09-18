@@ -9,3 +9,17 @@
 .auth-card button:disabled { opacity: .65; cursor: wait; }
 .auth-card a { color: #1f6feb; }
 .message { padding: .75rem; background: #eef5ff; border-radius: 6px; }
+.app-shell { min-height: 100vh; width: 100%; }
+.app-shell header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #16213e; color: white; }
+.app-shell nav { display: flex; gap: 1rem; align-items: center; }
+.app-shell nav a { color: white; text-decoration: none; }
+.app-shell nav button { background: transparent; color: white; border: 1px solid #fff8; border-radius: 5px; padding: .4rem .7rem; }
+.page { width: min(1200px, calc(100% - 2rem)); margin: 2rem auto; }
+.inline-form, .grid-form, .toolbar { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1.5rem; }
+.grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); padding: 1rem; background: white; border-radius: 8px; }
+.inline-form input, .grid-form input, .grid-form select, .toolbar input { padding: .65rem; border: 1px solid #b8c0ce; border-radius: 5px; font: inherit; }
+.inline-form button, .grid-form button, .toolbar button, table button { padding: .55rem .8rem; border: 0; border-radius: 5px; cursor: pointer; }
+table { width: 100%; border-collapse: collapse; background: white; margin-bottom: 2rem; }
+th, td { padding: .75rem; border-bottom: 1px solid #e0e5ec; text-align: left; }
+th { background: #eef2f7; }
+@media (max-width: 760px) { .app-shell header { align-items: flex-start; gap: 1rem; } .app-shell nav { flex-wrap: wrap; } }

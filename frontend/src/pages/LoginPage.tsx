@@ -15,7 +15,7 @@ export function LoginPage() {
     try {
       const result = await authApi.login(email, password)
       sessionStorage.setItem('almacencloud_access_token', result.accessToken)
-      setMessage(`Bienvenido, ${result.user.nombre}.`)
+      window.location.href = '/categorias'
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'No fue posible iniciar sesión.')
     } finally {

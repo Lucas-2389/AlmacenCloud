@@ -18,6 +18,8 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
                 ValidationException => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
                 ConflictException => (StatusCodes.Status409Conflict, "Conflicto"),
                 AuthenticationException => (StatusCodes.Status401Unauthorized, "No autorizado"),
+                NotFoundException => (StatusCodes.Status404NotFound, "Recurso no encontrado"),
+                BusinessRuleException => (StatusCodes.Status409Conflict, "Regla de negocio"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno")
             };
 

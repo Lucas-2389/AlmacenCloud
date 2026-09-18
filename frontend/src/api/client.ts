@@ -3,9 +3,10 @@ const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 type ApiError = { title?: string; detail?: string }
 
 async function request<T>(path: string, options: RequestInit): Promise<T> {
+  const token = sessionStorage.getItem('almacencloud_access_token')
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers },
   })
 
   if (!response.ok) {
@@ -13,6 +14,7 @@ async function request<T>(path: string, options: RequestInit): Promise<T> {
     throw new Error(problem.detail ?? problem.title ?? 'No fue posible completar la solicitud.')
   }
 
+  if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
 
@@ -40,4 +42,43 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify(input),
     }),
+}
+
+export type Categoria = { id: string; nombre: string; descripcion?: string; activo: boolean }
+export type Almacen = { id: string; codigo: string; nombre: string; direccion?: string; activo: boolean }
+export type Producto = {
+  id: string; categoriaId: string; categoria: string; codigo: string; nombre: string; descripcion?: string
+  unidadMedida: string; precioCompra: number; precioVenta: number; stockMinimo: number; afectoIgv: boolean; activo: boolean
+}
+export type Inventario = {
+  id: string; almacenId: string; almacen: string; productoId: string; codigoProducto: string; producto: string
+  cantidad: number; stockMinimo: number; stockBajo: boolean; version: number; actualizadoEn: string
+}
+export type Movimiento = {
+  id: string; almacenId: string; productoId: string; usuarioId: string; tipo: string; cantidad: number
+  stockAnterior: number; stockPosterior: number; motivo: string; referencia?: string; transferenciaId?: string; creadoEn: string
+}
+
+export const inventoryApi = {
+  categorias: () => request<Categoria[]>('/api/v1/categorias', { method: 'GET' }),
+  saveCategoria: (id: string | undefined, body: { nombre: string; descripcion?: string }) =>
+    request<Categoria>(id ? `/api/v1/categorias/${id}` : '/api/v1/categorias', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }),
+  deleteCategoria: (id: string) => request<void>(`/api/v1/categorias/${id}`, { method: 'DELETE' }),
+
+  productos: (search = '') => request<Producto[]>(`/api/v1/productos?search=${encodeURIComponent(search)}`, { method: 'GET' }),
+  saveProducto: (id: string | undefined, body: Omit<Producto, 'id' | 'categoria' | 'activo'>) =>
+    request<Producto>(id ? `/api/v1/productos/${id}` : '/api/v1/productos', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }),
+  deleteProducto: (id: string) => request<void>(`/api/v1/productos/${id}`, { method: 'DELETE' }),
+
+  almacenes: () => request<Almacen[]>('/api/v1/almacenes', { method: 'GET' }),
+  saveAlmacen: (id: string | undefined, body: { codigo: string; nombre: string; direccion?: string }) =>
+    request<Almacen>(id ? `/api/v1/almacenes/${id}` : '/api/v1/almacenes', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }),
+  deleteAlmacen: (id: string) => request<void>(`/api/v1/almacenes/${id}`, { method: 'DELETE' }),
+
+  inventario: () => request<Inventario[]>('/api/v1/inventario', { method: 'GET' }),
+  movimientos: () => request<{ items: Movimiento[] }>('/api/v1/inventario/movimientos?page=1&pageSize=50', { method: 'GET' }),
+  movimiento: (operation: 'entrada' | 'salida', body: { almacenId: string; productoId: string; cantidad: number; motivo: string; referencia?: string }) =>
+    request<Inventario>(`/api/v1/inventario/${operation}`, { method: 'POST', body: JSON.stringify(body) }),
+  transferencia: (body: { productoId: string; almacenOrigenId: string; almacenDestinoId: string; cantidad: number; motivo: string }) =>
+    request<void>('/api/v1/inventario/transferencia', { method: 'POST', body: JSON.stringify(body) }),
 }

@@ -47,6 +47,16 @@ Rutas iniciales: `/login` y `/register`. El token recibido se conserva en `sessi
 - `GET /api/v1/auth/me`
 - `GET /api/v1/tenant/context`
 
+## Núcleo de inventario
+
+- CRUD lógico de categorías, productos y almacenes bajo `/api/v1`.
+- Consulta de existencias y stock bajo en `/api/v1/inventario`.
+- Entradas, salidas y transferencias mediante operaciones transaccionales.
+- Historial paginado en `GET /api/v1/inventario/movimientos`.
+- Control de concurrencia distribuido mediante versión y actualización condicional en MySQL.
+
+La estrategia de concurrencia está documentada en `docs/decisiones-arquitectonicas/ADR-002-concurrencia-inventario.md`.
+
 ## Alcance pendiente
 
-No se han implementado productos, almacenes, inventario, ventas, SUNAT, Redis, AWS, Docker ni balanceo de carga.
+No se han implementado ventas, compras, SUNAT, Redis, AWS, Docker, balanceo de carga ni reportes avanzados.
