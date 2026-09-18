@@ -15,6 +15,11 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
     public DbSet<Almacen> Almacenes => Set<Almacen>();
     public DbSet<Inventario> Inventarios => Set<Inventario>();
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    public DbSet<Cliente> Clientes => Set<Cliente>();
+    public DbSet<Proveedor> Proveedores => Set<Proveedor>();
+    public DbSet<Venta> Ventas => Set<Venta>();
+    public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
+    public DbSet<SecuenciaVenta> SecuenciasVenta => Set<SecuenciaVenta>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,13 +33,18 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
         modelBuilder.Entity<Almacen>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Inventario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<MovimientoInventario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Cliente>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Proveedor>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Venta>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<VentaDetalle>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<SecuenciaVenta>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         foreach (var entry in ChangeTracker.Entries().Where(x => x.State == EntityState.Modified &&
-                     (x.Entity is Empresa || x.Entity is Usuario)))
+                     (x.Entity is Empresa || x.Entity is Usuario || x.Entity is Cliente || x.Entity is Proveedor)))
         {
             entry.Property("ActualizadoEn").CurrentValue = now;
         }

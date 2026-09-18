@@ -20,5 +20,5 @@ public sealed record InventarioResponse(Guid Id, Guid AlmacenId, string Almacen,
     string Producto, decimal Cantidad, decimal StockMinimo, bool StockBajo, long Version, DateTime ActualizadoEn);
 public sealed record MovimientoResponse(Guid Id, Guid AlmacenId, Guid ProductoId, Guid UsuarioId, TipoMovimiento Tipo,
     decimal Cantidad, decimal StockAnterior, decimal StockPosterior, string Motivo, string? Referencia,
-    Guid? TransferenciaId, DateTime CreadoEn);
+    Guid? TransferenciaId, Guid? VentaId, DateTime CreadoEn);
 public sealed record PagedResponse<T>(IReadOnlyCollection<T> Items, int Page, int PageSize, int Total);

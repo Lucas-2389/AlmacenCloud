@@ -255,5 +255,5 @@ public sealed class InventoryCoreService(IInventoryCoreRepository repository, IC
     private static InventarioResponse Map(Inventario x) => new(x.Id, x.AlmacenId, x.Almacen.Nombre, x.ProductoId, x.Producto.Codigo,
         x.Producto.Nombre, x.Cantidad, x.Producto.StockMinimo, x.Cantidad <= x.Producto.StockMinimo, x.Version, x.ActualizadoEn);
     private static MovimientoResponse Map(MovimientoInventario x) => new(x.Id, x.AlmacenId, x.ProductoId, x.UsuarioId, x.TipoMovimiento,
-        x.Cantidad, x.StockAnterior, x.StockPosterior, x.Motivo, x.Referencia, x.TransferenciaId, x.CreadoEn);
+        x.Cantidad, x.StockAnterior, x.StockPosterior, x.Motivo, x.Referencia, x.TransferenciaId, x.VentaId, x.CreadoEn);
 }

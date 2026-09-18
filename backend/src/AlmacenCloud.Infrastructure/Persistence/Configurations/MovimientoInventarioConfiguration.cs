@@ -18,9 +18,11 @@ public sealed class MovimientoInventarioConfiguration : IEntityTypeConfiguration
         builder.Property(x => x.Referencia).HasMaxLength(150);
         builder.HasIndex(x => new { x.EmpresaId, x.CreadoEn });
         builder.HasIndex(x => x.TransferenciaId);
+        builder.HasIndex(x => x.VentaId);
         builder.HasOne<Empresa>().WithMany().HasForeignKey(x => x.EmpresaId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Almacen).WithMany().HasForeignKey(x => x.AlmacenId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Producto).WithMany().HasForeignKey(x => x.ProductoId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Usuario).WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.Venta).WithMany().HasForeignKey(x => x.VentaId).OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -5,6 +5,7 @@ using AlmacenCloud.API.Services;
 using AlmacenCloud.Application.Abstractions;
 using AlmacenCloud.Application.Features.Auth;
 using AlmacenCloud.Application.Features.Inventory;
+using AlmacenCloud.Application.Features.Sales;
 using AlmacenCloud.Infrastructure.Identity;
 using AlmacenCloud.Infrastructure.Persistence;
 using AlmacenCloud.Infrastructure.Repositories;
@@ -27,6 +28,10 @@ builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInventoryCoreRepository, InventoryCoreRepository>();
 builder.Services.AddScoped<IInventoryCoreService, InventoryCoreService>();
+builder.Services.AddScoped<ISalesRepository, SalesRepository>();
+builder.Services.AddScoped<ISalesService, SalesService>();
+var taxRate = builder.Configuration.GetValue<decimal?>("SalesTax:Rate") ?? 0.18m;
+builder.Services.AddSingleton<ISalesTaxCalculator>(new SalesTaxCalculator(taxRate));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 builder.Services.AddDbContext<AlmacenCloudDbContext>(options =>

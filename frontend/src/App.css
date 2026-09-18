@@ -23,3 +23,7 @@ table { width: 100%; border-collapse: collapse; background: white; margin-bottom
 th, td { padding: .75rem; border-bottom: 1px solid #e0e5ec; text-align: left; }
 th { background: #eef2f7; }
 @media (max-width: 760px) { .app-shell header { align-items: flex-start; gap: 1rem; } .app-shell nav { flex-wrap: wrap; } }
+.primary-link, .submit-sale { display: inline-block; padding: .7rem 1rem; background: #1f6feb; color: white; border: 0; border-radius: 6px; text-decoration: none; }
+.totals, .sale-summary { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 1.5rem; margin: 1rem 0; }
+.sale-summary { justify-content: flex-start; background: white; padding: 1rem; border-radius: 8px; }
+.danger { padding: .7rem 1rem; background: #b42318; color: white; border: 0; border-radius: 6px; }

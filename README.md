@@ -57,6 +57,16 @@ Rutas iniciales: `/login` y `/register`. El token recibido se conserva en `sessi
 
 La estrategia de concurrencia está documentada en `docs/decisiones-arquitectonicas/ADR-002-concurrencia-inventario.md`.
 
+## Clientes, proveedores y ventas
+
+- CRUD lógico multitenant de clientes y proveedores.
+- Ventas multiproducto con numeración generada por backend.
+- Cálculo centralizado de IGV usando `SalesTax:Rate`; el precio unitario se interpreta como precio final incluido IGV.
+- Descuento CAS de inventario, movimientos vinculados mediante `VentaId` y rollback completo ante fallos.
+- Consulta paginada, detalle histórico con snapshot comercial y anulación con reposición de stock.
+
+Las decisiones transaccionales y de numeración están documentadas en `ADR-003-transaccion-venta-inventario.md` y `ADR-004-numeracion-ventas.md`.
+
 ## Alcance pendiente
 
-No se han implementado ventas, compras, SUNAT, Redis, AWS, Docker, balanceo de carga ni reportes avanzados.
+No se han implementado compras, SUNAT, facturación electrónica, Redis, AWS, Docker, balanceo de carga ni reportes avanzados.

@@ -17,3 +17,7 @@ Inventario tendrá una restricción única compuesta: `EmpresaId + AlmacenId + P
 Para cambios futuros de stock se aplicará concurrencia optimista (token de versión) y actualizaciones transaccionales. Esto permitirá detectar conflictos de stock y evitar cantidades negativas ante operaciones simultáneas. Una transferencia producirá una salida y una entrada dentro de la misma transacción, vinculadas opcionalmente por `TransferenciaId`.
 
 Los primeros roles previstos son `ADMIN_EMPRESA`, `VENDEDOR` y `ALMACENERO`; en la primera implementación solo se habilitará `ADMIN_EMPRESA`. Cada usuario pertenecerá obligatoriamente a una empresa.
+
+## Ventas
+
+Las ventas guardan snapshots comerciales de producto y se integran con inventario mediante una única transacción. La numeración se genera en backend con una secuencia CAS por empresa. Los precios enviados por el cliente se recalculan en backend; la tasa de IGV es configuración centralizada y el precio unitario se interpreta como precio final incluido IGV.

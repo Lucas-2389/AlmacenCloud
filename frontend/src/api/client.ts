@@ -56,8 +56,13 @@ export type Inventario = {
 }
 export type Movimiento = {
   id: string; almacenId: string; productoId: string; usuarioId: string; tipo: string; cantidad: number
-  stockAnterior: number; stockPosterior: number; motivo: string; referencia?: string; transferenciaId?: string; creadoEn: string
+  stockAnterior: number; stockPosterior: number; motivo: string; referencia?: string; transferenciaId?: string; ventaId?: string; creadoEn: string
 }
+export type Cliente = { id: string; tipoDocumento: string; numeroDocumento: string; nombreRazonSocial: string; direccion?: string; telefono?: string; email?: string; activo: boolean }
+export type Proveedor = { id: string; ruc: string; razonSocial: string; nombreComercial?: string; direccion?: string; telefono?: string; email?: string; activo: boolean }
+export type VentaDetalle = { id: string; productoId: string; codigoProducto: string; nombreProducto: string; unidadMedida: string; cantidad: number; precioUnitario: number; subtotal: number; igv: number; total: number }
+export type Venta = { id: string; numero: string; fecha: string; estado: string; clienteId?: string; cliente: string; almacenId: string; almacen: string; usuarioId: string; usuario: string; subtotal: number; igv: number; total: number; observacion?: string; anuladaPorUsuarioId?: string; anuladaEn?: string; detalles: VentaDetalle[] }
+export type VentaLista = { id: string; numero: string; fecha: string; estado: string; cliente: string; almacen: string; total: number }
 
 export const inventoryApi = {
   categorias: () => request<Categoria[]>('/api/v1/categorias', { method: 'GET' }),
@@ -81,4 +86,17 @@ export const inventoryApi = {
     request<Inventario>(`/api/v1/inventario/${operation}`, { method: 'POST', body: JSON.stringify(body) }),
   transferencia: (body: { productoId: string; almacenOrigenId: string; almacenDestinoId: string; cantidad: number; motivo: string }) =>
     request<void>('/api/v1/inventario/transferencia', { method: 'POST', body: JSON.stringify(body) }),
+}
+
+export const salesApi = {
+  clientes: (search = '') => request<Cliente[]>(`/api/v1/clientes?search=${encodeURIComponent(search)}`, { method: 'GET' }),
+  saveCliente: (id: string | undefined, body: Omit<Cliente, 'id' | 'activo'>) => request<Cliente>(id ? `/api/v1/clientes/${id}` : '/api/v1/clientes', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }),
+  deleteCliente: (id: string) => request<void>(`/api/v1/clientes/${id}`, { method: 'DELETE' }),
+  proveedores: (search = '') => request<Proveedor[]>(`/api/v1/proveedores?search=${encodeURIComponent(search)}`, { method: 'GET' }),
+  saveProveedor: (id: string | undefined, body: Omit<Proveedor, 'id' | 'activo'>) => request<Proveedor>(id ? `/api/v1/proveedores/${id}` : '/api/v1/proveedores', { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }),
+  deleteProveedor: (id: string) => request<void>(`/api/v1/proveedores/${id}`, { method: 'DELETE' }),
+  ventas: () => request<{ items: VentaLista[]; total: number }>('/api/v1/ventas?page=1&pageSize=50', { method: 'GET' }),
+  venta: (id: string) => request<Venta>(`/api/v1/ventas/${id}`, { method: 'GET' }),
+  createVenta: (body: { clienteId?: string; almacenId: string; items: { productoId: string; cantidad: number; precioUnitario: number }[]; observacion?: string }) => request<Venta>('/api/v1/ventas', { method: 'POST', body: JSON.stringify(body) }),
+  annulVenta: (id: string) => request<Venta>(`/api/v1/ventas/${id}/anular`, { method: 'POST' }),
 }

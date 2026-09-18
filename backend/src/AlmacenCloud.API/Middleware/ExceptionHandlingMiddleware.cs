@@ -20,6 +20,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
                 AuthenticationException => (StatusCodes.Status401Unauthorized, "No autorizado"),
                 NotFoundException => (StatusCodes.Status404NotFound, "Recurso no encontrado"),
                 BusinessRuleException => (StatusCodes.Status409Conflict, "Regla de negocio"),
+                ArgumentException => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno")
             };
 

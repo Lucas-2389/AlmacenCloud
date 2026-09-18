@@ -8,7 +8,7 @@ public sealed class MovimientoInventario
 
     private MovimientoInventario(Guid empresaId, Guid almacenId, Guid productoId, Guid usuarioId,
         TipoMovimiento tipo, decimal cantidad, decimal stockAnterior, decimal stockPosterior,
-        string motivo, string? referencia, Guid? transferenciaId)
+        string motivo, string? referencia, Guid? transferenciaId, Guid? ventaId)
     {
         Id = Guid.NewGuid();
         EmpresaId = empresaId;
@@ -22,6 +22,7 @@ public sealed class MovimientoInventario
         Motivo = motivo.Trim();
         Referencia = string.IsNullOrWhiteSpace(referencia) ? null : referencia.Trim();
         TransferenciaId = transferenciaId;
+        VentaId = ventaId;
         CreadoEn = DateTime.UtcNow;
     }
 
@@ -37,17 +38,19 @@ public sealed class MovimientoInventario
     public string Motivo { get; private set; } = null!;
     public string? Referencia { get; private set; }
     public Guid? TransferenciaId { get; private set; }
+    public Guid? VentaId { get; private set; }
     public DateTime CreadoEn { get; private set; }
     public Almacen Almacen { get; private set; } = null!;
     public Producto Producto { get; private set; } = null!;
     public Usuario Usuario { get; private set; } = null!;
+    public Venta? Venta { get; private set; }
 
     public static MovimientoInventario Create(Guid empresaId, Guid almacenId, Guid productoId, Guid usuarioId,
         TipoMovimiento tipo, decimal cantidad, decimal stockAnterior, decimal stockPosterior,
-        string motivo, string? referencia = null, Guid? transferenciaId = null)
+        string motivo, string? referencia = null, Guid? transferenciaId = null, Guid? ventaId = null)
     {
         if (cantidad <= 0) throw new ArgumentOutOfRangeException(nameof(cantidad));
         if (string.IsNullOrWhiteSpace(motivo)) throw new ArgumentException("El motivo es obligatorio.", nameof(motivo));
-        return new(empresaId, almacenId, productoId, usuarioId, tipo, cantidad, stockAnterior, stockPosterior, motivo, referencia, transferenciaId);
+        return new(empresaId, almacenId, productoId, usuarioId, tipo, cantidad, stockAnterior, stockPosterior, motivo, referencia, transferenciaId, ventaId);
     }
 }
