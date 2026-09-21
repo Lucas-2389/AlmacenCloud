@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlmacenCloud.Application.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlmacenCloud.IntegrationTests", "backend\tests\AlmacenCloud.IntegrationTests\AlmacenCloud.IntegrationTests.csproj", "{3660389B-7185-4595-8D68-F7296273B609}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlmacenCloud.MySqlIntegrationTests", "backend\tests\AlmacenCloud.MySqlIntegrationTests\AlmacenCloud.MySqlIntegrationTests.csproj", "{E6751090-89DC-44C9-9AC8-7808ABB21517}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,18 @@ Global
 		{3660389B-7185-4595-8D68-F7296273B609}.Release|x64.Build.0 = Release|Any CPU
 		{3660389B-7185-4595-8D68-F7296273B609}.Release|x86.ActiveCfg = Release|Any CPU
 		{3660389B-7185-4595-8D68-F7296273B609}.Release|x86.Build.0 = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|x64.Build.0 = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Debug|x86.Build.0 = Debug|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|x64.ActiveCfg = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|x64.Build.0 = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|x86.ActiveCfg = Release|Any CPU
+		{E6751090-89DC-44C9-9AC8-7808ABB21517}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,5 +145,6 @@ Global
 		{4C22306D-C586-4CB3-9FD2-2784D402BE14} = {F57642F3-C37C-D174-720E-6A6AAD5BEE22}
 		{6F4DE561-0407-4C09-A959-AA61AAB1D101} = {F57642F3-C37C-D174-720E-6A6AAD5BEE22}
 		{3660389B-7185-4595-8D68-F7296273B609} = {F57642F3-C37C-D174-720E-6A6AAD5BEE22}
+		{E6751090-89DC-44C9-9AC8-7808ABB21517} = {F57642F3-C37C-D174-720E-6A6AAD5BEE22}
 	EndGlobalSection
 EndGlobal
