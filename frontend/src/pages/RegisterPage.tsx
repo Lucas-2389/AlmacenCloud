@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { authApi } from '../api/client'
 import { Brand } from '../components/Brand'
+import { PasswordField } from '../components/PasswordField'
 
 const initial = { ruc: '', razonSocial: '', nombreComercial: '', nombre: '', apellidos: '', email: '', password: '' }
 
@@ -42,7 +43,7 @@ export function RegisterPage() {
         <label>Nombre del administrador<input value={form.nombre} onChange={(e) => update('nombre', e.target.value)} required /></label>
         <label>Apellidos<input value={form.apellidos} onChange={(e) => update('apellidos', e.target.value)} required /></label>
         <label>Email<input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required /></label>
-        <label>Contraseña<input type="password" minLength={8} value={form.password} onChange={(e) => update('password', e.target.value)} required /></label>
+        <PasswordField label="Contraseña" autoComplete="new-password" value={form.password} onChange={value => update('password', value)} />
         <button disabled={loading}>{loading ? 'Registrando…' : 'Crear empresa'}</button>
       </form>
       {message && <p role="status" className="message">{message}</p>}

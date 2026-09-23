@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,10 @@ builder.Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUser
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<CurrentUser>());
 builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
-builder.Services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
+if (builder.Environment.IsDevelopment())
+    builder.Services.AddScoped<IPasswordResetNotifier, DevelopmentPasswordResetNotifier>();
+else
+    builder.Services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInventoryCoreRepository, InventoryCoreRepository>();
@@ -97,13 +101,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
+var passwordReset = builder.Configuration.GetSection(PasswordResetSettings.SectionName).Get<PasswordResetSettings>() ?? new();
+if (passwordReset.Enabled && !builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
 {
     var smtp = builder.Configuration.GetSection(SmtpSettings.SectionName).Get<SmtpSettings>() ?? new();
-    var reset = builder.Configuration.GetSection(PasswordResetSettings.SectionName).Get<PasswordResetSettings>() ?? new();
     if (string.IsNullOrWhiteSpace(smtp.Host) || string.IsNullOrWhiteSpace(smtp.FromAddress) ||
-        !Uri.TryCreate(reset.FrontendBaseUrl, UriKind.Absolute, out var frontendUri) || frontendUri.Scheme != Uri.UriSchemeHttps)
-        throw new InvalidOperationException("Producción requiere Smtp:Host, Smtp:FromAddress y PasswordReset:FrontendBaseUrl con HTTPS.");
+        !Uri.TryCreate(passwordReset.FrontendBaseUrl, UriKind.Absolute, out var frontendUri) ||
+        (!builder.Environment.IsDevelopment() && frontendUri.Scheme != Uri.UriSchemeHttps))
+        throw new InvalidOperationException("PasswordReset habilitado requiere Smtp:Host, Smtp:FromAddress y PasswordReset:FrontendBaseUrl; fuera de Development la URL debe usar HTTPS.");
 }
 
 builder.Services.AddCors(options => options.AddPolicy("FrontendDevelopment", policy =>
@@ -145,6 +150,8 @@ app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok", message = "AlmacenCloud API is running" }));
+app.MapGet("/api/v1/config/public", (IOptions<PasswordResetSettings> options) =>
+    Results.Ok(new { passwordResetEnabled = options.Value.Enabled })).AllowAnonymous();
 app.MapFallback((HttpContext context) =>
 {
     var path = context.Request.Path;

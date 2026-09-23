@@ -16,6 +16,7 @@ public sealed class SmtpPasswordResetNotifier(
     {
         var smtp = smtpOptions.Value;
         var reset = resetOptions.Value;
+        if (!reset.Enabled) return;
         if (string.IsNullOrWhiteSpace(smtp.Host) || string.IsNullOrWhiteSpace(smtp.FromAddress) ||
             string.IsNullOrWhiteSpace(reset.FrontendBaseUrl))
         {

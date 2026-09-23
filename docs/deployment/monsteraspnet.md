@@ -40,6 +40,7 @@ AlmacenCloud utiliza la configuración estándar de ASP.NET Core. Configurar est
 | `Jwt:Audience` | `Jwt__Audience` | `AlmacenCloud.Web` |
 | `Jwt:ExpirationMinutes` | `Jwt__ExpirationMinutes` | `60` |
 | `SalesTax:Rate` | `SalesTax__Rate` | `0.18` |
+| `PasswordReset:Enabled` | `PasswordReset__Enabled` | `false` por defecto; `true` para activar recuperación |
 | `PasswordReset:FrontendBaseUrl` | `PasswordReset__FrontendBaseUrl` | URL pública HTTPS, sin `/` final |
 | `Smtp:Host` | `Smtp__Host` | Host del proveedor SMTP |
 | `Smtp:Port` | `Smtp__Port` | Normalmente `587` |
@@ -54,7 +55,9 @@ La variable `ConnectionStrings__DefaultConnection` debe usar el host remoto most
 
 Si el panel no ofrece variables de entorno directamente, usar únicamente el mecanismo de configuración privada recomendado por el proveedor. No crear un `appsettings.Production.json` con credenciales versionadas.
 
-El arranque en `Production` se detiene si falta la configuración SMTP o si `PasswordReset__FrontendBaseUrl` no usa HTTPS. Esto evita publicar un flujo de recuperación que exponga tokens o que prometa enviar correos sin poder hacerlo. El remitente debe estar verificado con el proveedor de correo; las credenciales SMTP no pertenecen a Git.
+La recuperación está deshabilitada por defecto en `Production`. Con `PasswordReset__Enabled=false`, la aplicación inicia normalmente sin SMTP y el frontend oculta el enlace de recuperación. Los endpoints permanecen disponibles pero responden `503` sin revelar datos de cuentas.
+
+Para activarla posteriormente, configurar `PasswordReset__Enabled=true`, `PasswordReset__FrontendBaseUrl=https://...`, `Smtp__Host`, `Smtp__Port=587`, `Smtp__EnableSsl=true`, `Smtp__FromAddress`, `Smtp__FromName=AlmacenCloud`, `Smtp__Username` y `Smtp__Password`. Solo cuando la función está habilitada, el arranque valida SMTP y exige una URL pública HTTPS. El remitente debe estar verificado con el proveedor; las credenciales SMTP no pertenecen a Git.
 
 ## 3. Aplicar migraciones a MySQL
 

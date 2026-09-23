@@ -41,6 +41,7 @@ export type RegisterCompanyInput = {
 }
 
 export const authApi = {
+  publicConfiguration: () => request<{ passwordResetEnabled: boolean }>('/api/v1/config/public', { method: 'GET' }),
   login: (email: string, password: string) =>
     request<LoginResponse>('/api/v1/auth/login', {
       method: 'POST',

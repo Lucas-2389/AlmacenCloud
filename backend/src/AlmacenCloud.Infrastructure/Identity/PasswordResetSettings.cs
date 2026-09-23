@@ -3,6 +3,7 @@ namespace AlmacenCloud.Infrastructure.Identity;
 public sealed class PasswordResetSettings
 {
     public const string SectionName = "PasswordReset";
+    public bool Enabled { get; set; }
     public string FrontendBaseUrl { get; set; } = string.Empty;
 }
 

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { authApi } from '../api/client'
 import { Brand } from '../components/Brand'
+import { PasswordField } from '../components/PasswordField'
 
 export function ResetPasswordPage() {
   const token = new URLSearchParams(window.location.search).get('token') ?? ''
@@ -10,6 +11,9 @@ export function ResetPasswordPage() {
   const [message, setMessage] = useState(token ? '' : 'El enlace de recuperación no contiene un token válido.')
   const [complete, setComplete] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+
+  useEffect(() => { authApi.publicConfiguration().then(x => setEnabled(x.passwordResetEnabled)).catch(() => setEnabled(false)) }, [])
 
   async function submit(event: FormEvent) {
     event.preventDefault(); setMessage('')
@@ -23,9 +27,11 @@ export function ResetPasswordPage() {
   return <main className="auth-card">
     <Brand />
     <div className="auth-heading"><p>Recuperación segura</p><h1>Nueva contraseña</h1><span>El enlace vence en 30 minutos y solo funciona una vez.</span></div>
-    {!complete && token && <form onSubmit={submit}>
-      <label>Nueva contraseña<input type="password" autoComplete="new-password" minLength={8} value={password} onChange={e => setPassword(e.target.value)} required /></label>
-      <label>Confirmar contraseña<input type="password" autoComplete="new-password" minLength={8} value={confirmation} onChange={e => setConfirmation(e.target.value)} required /></label>
+    {enabled === null && <p className="message">Verificando disponibilidad…</p>}
+    {enabled === false && <p className="message">La recuperación de contraseña no está disponible temporalmente.</p>}
+    {!complete && token && enabled && <form onSubmit={submit}>
+      <PasswordField label="Nueva contraseña" autoComplete="new-password" value={password} onChange={setPassword} />
+      <PasswordField label="Confirmar contraseña" autoComplete="new-password" value={confirmation} onChange={setConfirmation} />
       <button disabled={loading}>{loading ? 'Actualizando…' : 'Cambiar contraseña'}</button>
     </form>}
     {message && <p role="status" className="message">{message}</p>}

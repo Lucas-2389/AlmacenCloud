@@ -21,6 +21,10 @@ public sealed class AlmacenCloudApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jwt:Audience", "AlmacenCloud.Tests.Client");
         builder.UseSetting("Jwt:Secret", "integration-tests-only-secret-with-at-least-32-bytes");
         builder.UseSetting("Jwt:ExpirationMinutes", "60");
+        builder.UseSetting("PasswordReset:Enabled", "true");
+        builder.UseSetting("PasswordReset:FrontendBaseUrl", "http://localhost");
+        builder.UseSetting("Smtp:Host", "test.invalid");
+        builder.UseSetting("Smtp:FromAddress", "tests@example.test");
 
         builder.ConfigureServices(services =>
         {
