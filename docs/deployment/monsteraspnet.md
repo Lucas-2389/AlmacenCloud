@@ -40,11 +40,21 @@ AlmacenCloud utiliza la configuración estándar de ASP.NET Core. Configurar est
 | `Jwt:Audience` | `Jwt__Audience` | `AlmacenCloud.Web` |
 | `Jwt:ExpirationMinutes` | `Jwt__ExpirationMinutes` | `60` |
 | `SalesTax:Rate` | `SalesTax__Rate` | `0.18` |
+| `PasswordReset:FrontendBaseUrl` | `PasswordReset__FrontendBaseUrl` | URL pública HTTPS, sin `/` final |
+| `Smtp:Host` | `Smtp__Host` | Host del proveedor SMTP |
+| `Smtp:Port` | `Smtp__Port` | Normalmente `587` |
+| `Smtp:EnableSsl` | `Smtp__EnableSsl` | `true` |
+| `Smtp:FromAddress` | `Smtp__FromAddress` | Remitente verificado |
+| `Smtp:FromName` | `Smtp__FromName` | `AlmacenCloud` |
+| `Smtp:Username` | `Smtp__Username` | Usuario SMTP (secreto) |
+| `Smtp:Password` | `Smtp__Password` | Contraseña SMTP (secreto) |
 | Entorno | `ASPNETCORE_ENVIRONMENT` | `Production` |
 
 La variable `ConnectionStrings__DefaultConnection` debe usar el host remoto mostrado por Monster, nunca `localhost`. No registrar valores de secretos en capturas, logs ni documentación.
 
 Si el panel no ofrece variables de entorno directamente, usar únicamente el mecanismo de configuración privada recomendado por el proveedor. No crear un `appsettings.Production.json` con credenciales versionadas.
+
+El arranque en `Production` se detiene si falta la configuración SMTP o si `PasswordReset__FrontendBaseUrl` no usa HTTPS. Esto evita publicar un flujo de recuperación que exponga tokens o que prometa enviar correos sin poder hacerlo. El remitente debe estar verificado con el proveedor de correo; las credenciales SMTP no pertenecen a Git.
 
 ## 3. Aplicar migraciones a MySQL
 
@@ -113,6 +123,7 @@ Abrir la URL pública y validar:
 4. `/api/v1/ruta-inexistente` responde `404` y no devuelve `index.html`.
 5. `/swagger` no está disponible en `Production` por defecto.
 6. Registrar una empresa de demostración.
+7. Solicitar recuperación desde `/forgot-password`, abrir el correo y comprobar que el enlace de un solo uso permite cambiar la contraseña.
 7. Iniciar sesión.
 8. Probar productos, compras, inventario y ventas con pocos datos.
 9. Revisar los logs de aplicación del panel sin copiar secretos.

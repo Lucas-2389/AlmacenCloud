@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { authApi } from '../api/client'
+import { Brand } from '../components/Brand'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -25,15 +26,15 @@ export function LoginPage() {
 
   return (
     <main className="auth-card">
-      <h1>Iniciar sesión</h1>
-      <p>Accede a tu empresa en AlmacenCloud.</p>
+      <Brand />
+      <div className="auth-heading"><p>Gestión inteligente de inventarios</p><h1>Iniciar sesión</h1><span>Accede al espacio de trabajo de tu empresa.</span></div>
       <form onSubmit={submit}>
         <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
         <label>Contraseña<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
         <button disabled={loading}>{loading ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
       {message && <p role="status" className="message">{message}</p>}
-      <a href="/register">Registrar empresa</a>
+      <div className="auth-links"><a href="/forgot-password">Olvidé mi contraseña</a><a href="/register">Registrar empresa</a></div>
     </main>
   )
 }

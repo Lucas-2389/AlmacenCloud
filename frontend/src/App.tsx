@@ -16,6 +16,8 @@ import { ComprasPage } from './pages/ComprasPage'
 import { NuevaCompraPage } from './pages/NuevaCompraPage'
 import { CompraDetallePage } from './pages/CompraDetallePage'
 import { DashboardPage } from './pages/DashboardPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 
 const SESSION_KEY = 'almacencloud_access_token'
 
@@ -30,6 +32,8 @@ export default function App() {
   const publicRoutes: Record<string, ReactNode> = {
     '/register': <RegisterPage />,
     '/login': <LoginPage />,
+    '/forgot-password': <ForgotPasswordPage />,
+    '/reset-password': <ResetPasswordPage />,
   }
   const protectedRoutes: Record<string, ReactNode> = {
     '/dashboard': <DashboardPage />, '/categorias': <CategoriasPage />, '/productos': <ProductosPage />, '/almacenes': <AlmacenesPage />, '/inventario': <InventarioPage />, '/clientes': <ClientesPage />, '/proveedores': <ProveedoresPage />, '/ventas': <VentasPage />, '/ventas/nueva': <NuevaVentaPage />, '/compras': <ComprasPage />, '/compras/nueva': <NuevaCompraPage />,

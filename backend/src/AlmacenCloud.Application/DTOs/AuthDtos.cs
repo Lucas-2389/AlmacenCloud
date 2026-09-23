@@ -11,6 +11,9 @@ public sealed record RegisterCompanyRequest(
 
 public sealed record RegisterAdminRequest(string Nombre, string Apellidos, string Email, string Password);
 public sealed record LoginRequest(string Email, string Password);
+public sealed record ForgotPasswordRequest(string Email);
+public sealed record ResetPasswordRequest(string Token, string NewPassword);
+public sealed record MessageResponse(string Message);
 public sealed record UserResponse(Guid Id, string Nombre, string Email, Guid EmpresaId, IReadOnlyCollection<string> Roles);
 public sealed record AuthResponse(string AccessToken, long ExpiresIn, UserResponse User);
 public sealed record RegisterCompanyResponse(Guid EmpresaId, Guid UsuarioId);

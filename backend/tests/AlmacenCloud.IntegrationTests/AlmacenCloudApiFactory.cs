@@ -1,4 +1,5 @@
 using AlmacenCloud.Infrastructure.Persistence;
+using AlmacenCloud.Application.Abstractions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,24 @@ public sealed class AlmacenCloudApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<AlmacenCloudDbContext>();
             services.AddDbContext<AlmacenCloudDbContext>(options =>
                 options.UseInMemoryDatabase(_databaseName));
+            services.RemoveAll<IPasswordResetNotifier>();
+            services.AddSingleton<TestPasswordResetNotifier>();
+            services.AddSingleton<IPasswordResetNotifier>(sp => sp.GetRequiredService<TestPasswordResetNotifier>());
         });
+    }
+}
+
+public sealed class TestPasswordResetNotifier : IPasswordResetNotifier
+{
+    private readonly Dictionary<string, string> _tokens = new(StringComparer.OrdinalIgnoreCase);
+    public Task SendAsync(string email, string name, string rawToken, CancellationToken cancellationToken)
+    {
+        lock (_tokens) _tokens[email] = rawToken;
+        return Task.CompletedTask;
+    }
+
+    public string TokenFor(string email)
+    {
+        lock (_tokens) return _tokens[email];
     }
 }

@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.Extensions.FileProviders;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,7 @@ builder.Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUser
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<CurrentUser>());
 builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<IPasswordResetNotifier, SmtpPasswordResetNotifier>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInventoryCoreRepository, InventoryCoreRepository>();
@@ -42,6 +44,18 @@ var taxRate = builder.Configuration.GetValue<decimal?>("SalesTax:Rate") ?? 0.18m
 builder.Services.AddSingleton<ISalesTaxCalculator>(new SalesTaxCalculator(taxRate));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection(SmtpSettings.SectionName));
+builder.Services.Configure<PasswordResetSettings>(builder.Configuration.GetSection(PasswordResetSettings.SectionName));
+builder.Services.AddRateLimiter(options => options.AddPolicy("password-recovery", context =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(10),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        })));
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection mediante user-secrets o la variable ConnectionStrings__DefaultConnection.");
@@ -83,6 +97,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
+{
+    var smtp = builder.Configuration.GetSection(SmtpSettings.SectionName).Get<SmtpSettings>() ?? new();
+    var reset = builder.Configuration.GetSection(PasswordResetSettings.SectionName).Get<PasswordResetSettings>() ?? new();
+    if (string.IsNullOrWhiteSpace(smtp.Host) || string.IsNullOrWhiteSpace(smtp.FromAddress) ||
+        !Uri.TryCreate(reset.FrontendBaseUrl, UriKind.Absolute, out var frontendUri) || frontendUri.Scheme != Uri.UriSchemeHttps)
+        throw new InvalidOperationException("Producción requiere Smtp:Host, Smtp:FromAddress y PasswordReset:FrontendBaseUrl con HTTPS.");
+}
+
 builder.Services.AddCors(options => options.AddPolicy("FrontendDevelopment", policy =>
     policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod()));
 
@@ -118,6 +141,7 @@ if (!app.Environment.IsEnvironment("Testing")) app.UseHttpsRedirection();
 app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = new PhysicalFileProvider(localWebRoot) });
 app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(localWebRoot) });
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok", message = "AlmacenCloud API is running" }));

@@ -1,4 +1,6 @@
 using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 using AlmacenCloud.Application.Abstractions;
 using AlmacenCloud.Application.Common;
 using AlmacenCloud.Application.DTOs;
@@ -11,6 +13,7 @@ public sealed class AuthService(
     IIdentityRepository repository,
     IPasswordService passwordService,
     IJwtTokenGenerator jwtTokenGenerator,
+    IPasswordResetNotifier passwordResetNotifier,
     ICurrentUser currentUser) : IAuthService
 {
     public async Task<RegisterCompanyResponse> RegisterCompanyAsync(RegisterCompanyRequest request, CancellationToken cancellationToken)
@@ -75,6 +78,50 @@ public sealed class AuthService(
         var roles = usuario.UsuarioRoles.Select(x => x.Rol.Nombre).OrderBy(x => x).ToArray();
         return new CurrentUserResponse(usuario.Id, usuario.Nombre, usuario.Email, usuario.EmpresaId, usuario.Empresa.RazonSocial, roles);
     }
+
+    public async Task RequestPasswordResetAsync(ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Email)) return;
+        var email = request.Email.Trim().ToLowerInvariant();
+        var usuario = await repository.FindUserForPasswordResetAsync(email, cancellationToken);
+        if (usuario is null || !usuario.Activo || !usuario.Empresa.Activo) return;
+
+        var now = DateTime.UtcNow;
+        var rawToken = ToBase64Url(RandomNumberGenerator.GetBytes(32));
+        await repository.InvalidatePasswordResetTokensAsync(usuario.Id, now, cancellationToken);
+        repository.Add(PasswordResetToken.Create(usuario.Id, usuario.EmpresaId, HashToken(rawToken), now.AddMinutes(30)));
+        await repository.SaveChangesAsync(cancellationToken);
+        await passwordResetNotifier.SendAsync(usuario.Email, usuario.Nombre, rawToken, cancellationToken);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+            throw new ValidationException("El enlace no es válido o la nueva contraseña no cumple el mínimo de 8 caracteres.");
+
+        var token = await repository.FindPasswordResetTokenAsync(HashToken(request.Token), cancellationToken);
+        var now = DateTime.UtcNow;
+        if (token is null || !token.IsValid(now) || !token.Usuario.Activo || !token.Usuario.Empresa.Activo)
+            throw new ValidationException("El enlace de recuperación no es válido o ha vencido.");
+
+        await using var transaction = await repository.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            token.Usuario.SetPasswordHash(passwordService.Hash(token.Usuario, request.NewPassword));
+            token.MarkUsed(now);
+            await repository.InvalidatePasswordResetTokensAsync(token.UsuarioId, now, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    private static string HashToken(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+    private static string ToBase64Url(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
     private static void ValidateRegistration(RegisterCompanyRequest request)
     {

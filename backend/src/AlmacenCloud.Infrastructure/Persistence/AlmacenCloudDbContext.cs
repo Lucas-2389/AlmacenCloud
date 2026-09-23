@@ -10,6 +10,7 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<UsuarioRol> UsuarioRoles => Set<UsuarioRol>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Producto> Productos => Set<Producto>();
     public DbSet<Almacen> Almacenes => Set<Almacen>();
@@ -32,6 +33,7 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
         modelBuilder.Entity<Empresa>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.Id);
         modelBuilder.Entity<Usuario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<UsuarioRol>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.Usuario.EmpresaId);
+        modelBuilder.Entity<PasswordResetToken>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Categoria>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Producto>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Almacen>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);

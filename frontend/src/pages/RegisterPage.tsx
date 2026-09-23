@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { authApi } from '../api/client'
+import { Brand } from '../components/Brand'
 
 const initial = { ruc: '', razonSocial: '', nombreComercial: '', nombre: '', apellidos: '', email: '', password: '' }
 
@@ -32,7 +33,8 @@ export function RegisterPage() {
 
   return (
     <main className="auth-card wide">
-      <h1>Registrar empresa</h1>
+      <Brand />
+      <div className="auth-heading"><p>Gestión inteligente de inventarios</p><h1>Registrar empresa</h1><span>Crea el espacio de trabajo de tu organización en AlmacenCloud.</span></div>
       <form onSubmit={submit}>
         <label>RUC<input value={form.ruc} onChange={(e) => update('ruc', e.target.value)} pattern="[0-9]{11}" maxLength={11} required /></label>
         <label>Razón social<input value={form.razonSocial} onChange={(e) => update('razonSocial', e.target.value)} required /></label>

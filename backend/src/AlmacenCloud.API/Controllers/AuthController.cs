@@ -2,6 +2,7 @@ using AlmacenCloud.Application.DTOs;
 using AlmacenCloud.Application.Features.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AlmacenCloud.API.Controllers;
 
@@ -23,6 +24,26 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken) =>
         Ok(await authService.LoginAsync(request, cancellationToken));
+
+    [AllowAnonymous]
+    [EnableRateLimiting("password-recovery")]
+    [HttpPost("forgot-password")]
+    [ProducesResponseType<MessageResponse>(StatusCodes.Status202Accepted)]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await authService.RequestPasswordResetAsync(request, cancellationToken);
+        return Accepted(new MessageResponse("Si el correo pertenece a una cuenta activa, recibirás instrucciones para restablecer la contraseña."));
+    }
+
+    [AllowAnonymous]
+    [EnableRateLimiting("password-recovery")]
+    [HttpPost("reset-password")]
+    [ProducesResponseType<MessageResponse>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await authService.ResetPasswordAsync(request, cancellationToken);
+        return Ok(new MessageResponse("La contraseña fue actualizada. Ya puedes iniciar sesión."));
+    }
 
     [Authorize]
     [HttpGet("me")]

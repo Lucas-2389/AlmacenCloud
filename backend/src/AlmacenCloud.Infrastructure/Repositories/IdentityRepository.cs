@@ -29,10 +29,28 @@ public sealed class IdentityRepository(AlmacenCloudDbContext dbContext) : IIdent
             .Include(x => x.UsuarioRoles).ThenInclude(x => x.Rol)
             .SingleOrDefaultAsync(x => x.Id == usuarioId && x.EmpresaId == empresaId, cancellationToken);
 
+    public Task<Usuario?> FindUserForPasswordResetAsync(string email, CancellationToken cancellationToken) =>
+        dbContext.Usuarios.IgnoreQueryFilters().Include(x => x.Empresa)
+            .SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
+
+    public Task<PasswordResetToken?> FindPasswordResetTokenAsync(string tokenHash, CancellationToken cancellationToken) =>
+        dbContext.PasswordResetTokens.IgnoreQueryFilters()
+            .Include(x => x.Usuario).ThenInclude(x => x.Empresa)
+            .SingleOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
+
+    public async Task InvalidatePasswordResetTokensAsync(Guid usuarioId, DateTime now, CancellationToken cancellationToken)
+    {
+        var tokens = await dbContext.PasswordResetTokens.IgnoreQueryFilters()
+            .Where(x => x.UsuarioId == usuarioId && x.UsadoEn == null)
+            .ToListAsync(cancellationToken);
+        foreach (var token in tokens) token.MarkUsed(now);
+    }
+
     public void Add(Empresa empresa) => dbContext.Empresas.Add(empresa);
     public void Add(Usuario usuario) => dbContext.Usuarios.Add(usuario);
     public void Add(Rol rol) => dbContext.Roles.Add(rol);
     public void Add(UsuarioRol usuarioRol) => dbContext.UsuarioRoles.Add(usuarioRol);
+    public void Add(PasswordResetToken token) => dbContext.PasswordResetTokens.Add(token);
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken) => dbContext.SaveChangesAsync(cancellationToken);
 
     public async Task<IAppTransaction> BeginTransactionAsync(CancellationToken cancellationToken)

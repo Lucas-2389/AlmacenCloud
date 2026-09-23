@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AlmacenCloud.IntegrationTests;
 
@@ -66,6 +67,30 @@ public sealed class AuthenticationFlowTests(AlmacenCloudApiFactory factory) : IC
         var client = factory.CreateClient();
         var response = await client.GetAsync("/api/v1/auth/me");
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PasswordReset_IsGenericOneTimeAndChangesThePassword()
+    {
+        const string email = "reset@empresa.com";
+        var registration = await _client.PostAsJsonAsync("/api/v1/auth/register-company",
+            Registration("20555123456", "Empresa Reset SAC", email));
+        Assert.Equal(HttpStatusCode.Created, registration.StatusCode);
+
+        var unknown = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password", new { email = "no-existe@empresa.com" });
+        var requested = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password", new { email });
+        Assert.Equal(HttpStatusCode.Accepted, unknown.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, requested.StatusCode);
+
+        var notifier = factory.Services.GetRequiredService<TestPasswordResetNotifier>();
+        var token = notifier.TokenFor(email);
+        var reset = await _client.PostAsJsonAsync("/api/v1/auth/reset-password", new { token, newPassword = "NuevaClave123!" });
+        Assert.Equal(HttpStatusCode.OK, reset.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Login(email, "Secure123!")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await Login(email, "NuevaClave123!")).StatusCode);
+
+        var reuse = await _client.PostAsJsonAsync("/api/v1/auth/reset-password", new { token, newPassword = "OtraClave123!" });
+        Assert.Equal(HttpStatusCode.BadRequest, reuse.StatusCode);
     }
 
     private Task<HttpResponseMessage> Login(string email, string password) =>
