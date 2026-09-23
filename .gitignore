@@ -25,7 +25,7 @@ Thumbs.db
 appsettings.Local.json
 *.publishSettings
 *.pubxml.user
-
+*.pubxml
 # Local publish output
 publish/
 backend/src/AlmacenCloud.API/wwwroot/uploads/
