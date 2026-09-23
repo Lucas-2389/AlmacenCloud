@@ -13,11 +13,11 @@ Plataforma SaaS multitenant para la gestión empresarial de pequeñas y medianas
 El repositorio no contiene contraseñas, cadenas de conexión reales ni secretos JWT. Configúralos para el proyecto API mediante user-secrets:
 
 ```powershell
-dotnet user-secrets set "ConnectionStrings:MySql" "Server=localhost;Port=3306;Database=AlmacenCloud;User=TU_USUARIO;Password=TU_PASSWORD;" --project backend/src/AlmacenCloud.API
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Port=3306;Database=AlmacenCloud;User=TU_USUARIO;Password=TU_PASSWORD;" --project backend/src/AlmacenCloud.API
 dotnet user-secrets set "Jwt:Secret" "UNA_CLAVE_ALEATORIA_DE_AL_MENOS_32_BYTES" --project backend/src/AlmacenCloud.API
 ```
 
-También pueden utilizarse las variables de entorno `ConnectionStrings__MySql` y `Jwt__Secret`.
+También pueden utilizarse las variables de entorno `ConnectionStrings__DefaultConnection` y `Jwt__Secret`.
 
 ## Base de datos y ejecución
 
@@ -67,6 +67,16 @@ La estrategia de concurrencia está documentada en `docs/decisiones-arquitectoni
 
 Las decisiones transaccionales y de numeración están documentadas en `ADR-003-transaccion-venta-inventario.md` y `ADR-004-numeracion-ventas.md`.
 
+## Compras
+
+- Registro multiproducto vinculado a proveedor y almacén.
+- Numeración concurrente por empresa con formato `C00000001`.
+- Entrada automática de inventario y movimientos auditables vinculados mediante `CompraId`.
+- Consulta paginada, detalle con snapshot histórico y anulación sin permitir stock negativo.
+- Pantallas `/compras`, `/compras/nueva` y `/compras/:id`.
+
+Las decisiones se documentan en `ADR-005-transaccion-compra-inventario.md` y `ADR-006-numeracion-compras.md`.
+
 ## Pruebas
 
 El manifiesto local fija `dotnet-ef` en la versión 10.0.9. Para restaurarlo y comprobarlo:
@@ -100,4 +110,4 @@ La suite MySQL no reutiliza la conexión de la API. Antes de abrir una conexión
 
 ## Alcance pendiente
 
-No se han implementado compras, SUNAT, facturación electrónica, Redis, AWS, Docker, balanceo de carga ni reportes avanzados.
+No se han implementado SUNAT, facturación electrónica, Redis, AWS, Docker, balanceo de carga ni reportes avanzados.

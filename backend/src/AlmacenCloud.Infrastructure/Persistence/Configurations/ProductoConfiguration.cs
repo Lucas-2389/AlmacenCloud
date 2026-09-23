@@ -13,6 +13,7 @@ public sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Property(x => x.Codigo).HasMaxLength(80).IsRequired();
         builder.Property(x => x.Nombre).HasMaxLength(200).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(1000);
+        builder.Property(x => x.ImagenUrl).HasMaxLength(500);
         builder.Property(x => x.UnidadMedida).HasConversion<string>().HasMaxLength(30);
         builder.Property(x => x.PrecioCompra).HasPrecision(18, 2);
         builder.Property(x => x.PrecioVenta).HasPrecision(18, 2);

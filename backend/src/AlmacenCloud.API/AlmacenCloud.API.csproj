@@ -19,6 +19,21 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>d6e8b872-79b4-4fc5-9d61-0112338d21bc</UserSecretsId>
+    <SpaRoot>$(MSBuildProjectDirectory)\..\..\..\frontend\</SpaRoot>
   </PropertyGroup>
+
+  <Target Name="BuildFrontendForPublish" AfterTargets="ComputeFilesToPublish">
+    <Message Importance="high" Text="Installing and building the React frontend for ASP.NET Core publish..." />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm ci" />
+    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build" />
+    <ItemGroup>
+      <FrontendDistFiles Include="$(SpaRoot)dist\**\*" />
+      <ResolvedFileToPublish Include="@(FrontendDistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>

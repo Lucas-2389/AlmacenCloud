@@ -5,14 +5,17 @@ using AlmacenCloud.API.Services;
 using AlmacenCloud.Application.Abstractions;
 using AlmacenCloud.Application.Features.Auth;
 using AlmacenCloud.Application.Features.Inventory;
+using AlmacenCloud.Application.Features.Purchasing;
 using AlmacenCloud.Application.Features.Sales;
 using AlmacenCloud.Infrastructure.Identity;
 using AlmacenCloud.Infrastructure.Persistence;
 using AlmacenCloud.Infrastructure.Repositories;
+using AlmacenCloud.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,22 +31,28 @@ builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInventoryCoreRepository, InventoryCoreRepository>();
 builder.Services.AddScoped<IInventoryCoreService, InventoryCoreService>();
+var localWebRoot = builder.Environment.WebRootPath ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(localWebRoot);
+builder.Services.AddSingleton<IProductImageStorage>(new LocalProductImageStorage(localWebRoot));
 builder.Services.AddScoped<ISalesRepository, SalesRepository>();
 builder.Services.AddScoped<ISalesService, SalesService>();
+builder.Services.AddScoped<IPurchasingRepository, PurchasingRepository>();
+builder.Services.AddScoped<IPurchasingService, PurchasingService>();
 var taxRate = builder.Configuration.GetValue<decimal?>("SalesTax:Rate") ?? 0.18m;
 builder.Services.AddSingleton<ISalesTaxCalculator>(new SalesTaxCalculator(taxRate));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-builder.Services.AddDbContext<AlmacenCloudDbContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("MySql");
-    if (string.IsNullOrWhiteSpace(connectionString))
-        throw new InvalidOperationException("Configure ConnectionStrings:MySql mediante user-secrets o variables de entorno.");
-    options.UseMySQL(connectionString);
-});
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection mediante user-secrets o la variable ConnectionStrings__DefaultConnection.");
+builder.Services.AddDbContext<AlmacenCloudDbContext>(options => options.UseMySQL(connectionString));
 
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 var jwt = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() ?? new JwtSettings();
+if (Encoding.UTF8.GetByteCount(jwt.Secret) < 32)
+    throw new InvalidOperationException("Configure Jwt:Secret con al menos 32 bytes mediante user-secrets o la variable Jwt__Secret.");
+if (string.IsNullOrWhiteSpace(jwt.Issuer) || string.IsNullOrWhiteSpace(jwt.Audience) || jwt.ExpirationMinutes <= 0)
+    throw new InvalidOperationException("La configuración Jwt:Issuer, Jwt:Audience y Jwt:ExpirationMinutes debe ser válida.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -105,11 +114,24 @@ if (app.Environment.IsDevelopment())
     app.UseCors("FrontendDevelopment");
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Testing")) app.UseHttpsRedirection();
+app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = new PhysicalFileProvider(localWebRoot) });
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(localWebRoot) });
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok", message = "AlmacenCloud API is running" }));
+app.MapFallback((HttpContext context) =>
+{
+    var path = context.Request.Path;
+    if (path.StartsWithSegments("/api") || path.StartsWithSegments("/swagger") || path.StartsWithSegments("/health"))
+        return Results.NotFound();
+
+    var indexFile = Path.Combine(localWebRoot, "index.html");
+    return File.Exists(indexFile)
+        ? Results.File(indexFile, "text/html")
+        : Results.NotFound();
+});
 
 app.Run();
 

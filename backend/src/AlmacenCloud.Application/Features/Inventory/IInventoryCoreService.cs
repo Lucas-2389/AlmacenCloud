@@ -16,6 +16,8 @@ public interface IInventoryCoreService
     Task<ProductoResponse> CreateProductoAsync(ProductoRequest request, CancellationToken ct);
     Task<ProductoResponse> UpdateProductoAsync(Guid id, ProductoRequest request, CancellationToken ct);
     Task DeleteProductoAsync(Guid id, CancellationToken ct);
+    Task<ProductoResponse> UploadProductoImageAsync(Guid id, Stream content, string fileName, string contentType, long length, CancellationToken ct);
+    Task<ProductoResponse> DeleteProductoImageAsync(Guid id, CancellationToken ct);
 
     Task<IReadOnlyCollection<AlmacenResponse>> GetAlmacenesAsync(CancellationToken ct);
     Task<AlmacenResponse> GetAlmacenAsync(Guid id, CancellationToken ct);

@@ -20,4 +20,12 @@ Thumbs.db
 .env
 .env.*
 !*.example
+.env.local
+.env.production.local
 appsettings.Local.json
+*.publishSettings
+*.pubxml.user
+
+# Local publish output
+publish/
+backend/src/AlmacenCloud.API/wwwroot/uploads/

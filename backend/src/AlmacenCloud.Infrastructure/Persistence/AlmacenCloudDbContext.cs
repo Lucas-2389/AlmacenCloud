@@ -20,6 +20,9 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
     public DbSet<Venta> Ventas => Set<Venta>();
     public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
     public DbSet<SecuenciaVenta> SecuenciasVenta => Set<SecuenciaVenta>();
+    public DbSet<Compra> Compras => Set<Compra>();
+    public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
+    public DbSet<SecuenciaCompra> SecuenciasCompra => Set<SecuenciaCompra>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +31,7 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
         // Fail-closed: without a valid tenant, tenant-scoped queries return no rows.
         modelBuilder.Entity<Empresa>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.Id);
         modelBuilder.Entity<Usuario>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<UsuarioRol>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.Usuario.EmpresaId);
         modelBuilder.Entity<Categoria>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Producto>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<Almacen>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
@@ -38,6 +42,9 @@ public sealed class AlmacenCloudDbContext(DbContextOptions<AlmacenCloudDbContext
         modelBuilder.Entity<Venta>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<VentaDetalle>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
         modelBuilder.Entity<SecuenciaVenta>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<Compra>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<CompraDetalle>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
+        modelBuilder.Entity<SecuenciaCompra>().HasQueryFilter(x => tenantContext.HasTenant && tenantContext.EmpresaId == x.EmpresaId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

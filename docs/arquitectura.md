@@ -21,3 +21,21 @@ Los primeros roles previstos son `ADMIN_EMPRESA`, `VENDEDOR` y `ALMACENERO`; en 
 ## Ventas
 
 Las ventas guardan snapshots comerciales de producto y se integran con inventario mediante una única transacción. La numeración se genera en backend con una secuencia CAS por empresa. Los precios enviados por el cliente se recalculan en backend; la tasa de IGV es configuración centralizada y el precio unitario se interpreta como precio final incluido IGV.
+
+## Compras y ciclo operativo
+
+```text
+Proveedor
+   ↓
+Compra ──→ CompraDetalle (snapshot del producto)
+   ↓
+MovimientoInventario (COMPRA_ENTRADA)
+   ↓
+Inventario
+   ↓
+Venta ──→ MovimientoInventario (SALIDA)
+```
+
+Compras y ventas comparten el inventario, el cálculo central de IGV y la estrategia CAS, pero mantienen agregados, repositorios y secuencias independientes. Las anulaciones son compensaciones auditables; no eliminan cabeceras, detalles ni movimientos.
+
+Las decisiones de Compras están documentadas en `decisiones-arquitectonicas/ADR-005-transaccion-compra-inventario.md` y `decisiones-arquitectonicas/ADR-006-numeracion-compras.md`.

@@ -15,7 +15,7 @@ public sealed class AlmacenCloudApiFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.UseSetting("ConnectionStrings:MySql", "Server=unused;Database=unused;User=unused;Password=unused;");
+        builder.UseSetting("ConnectionStrings:DefaultConnection", "Server=unused;Database=unused;User=unused;Password=unused;");
         builder.UseSetting("Jwt:Issuer", "AlmacenCloud.Tests");
         builder.UseSetting("Jwt:Audience", "AlmacenCloud.Tests.Client");
         builder.UseSetting("Jwt:Secret", "integration-tests-only-secret-with-at-least-32-bytes");

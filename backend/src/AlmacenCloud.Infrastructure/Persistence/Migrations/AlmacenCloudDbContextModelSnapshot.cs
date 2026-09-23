@@ -151,6 +151,148 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                     b.ToTable("Clientes", (string)null);
                 });
 
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.Compra", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("AlmacenId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("AnuladoEn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("AnuladoPorUsuarioId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("Igv")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("NumeroDocumentoProveedor")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Observacion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<Guid>("ProveedorId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlmacenId");
+
+                    b.HasIndex("AnuladoPorUsuarioId");
+
+                    b.HasIndex("ProveedorId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("EmpresaId", "Fecha");
+
+                    b.HasIndex("EmpresaId", "Numero")
+                        .IsUnique();
+
+                    b.ToTable("Compras", (string)null);
+                });
+
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.CompraDetalle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Cantidad")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("CodigoProducto")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<Guid>("CompraId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Igv")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NombreProducto")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductoId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UnidadMedida")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.HasIndex("CompraId", "ProductoId")
+                        .IsUnique();
+
+                    b.ToTable("CompraDetalles", (string)null);
+                });
+
             modelBuilder.Entity("AlmacenCloud.Domain.Entities.Empresa", b =>
                 {
                     b.Property<Guid>("Id")
@@ -254,6 +396,9 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<Guid?>("CompraId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime>("CreadoEn")
                         .HasColumnType("datetime(6)");
 
@@ -297,6 +442,8 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AlmacenId");
+
+                    b.HasIndex("CompraId");
 
                     b.HasIndex("ProductoId");
 
@@ -343,6 +490,10 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("EmpresaId")
                         .HasColumnType("char(36)");
+
+                    b.Property<string>("ImagenUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -445,6 +596,23 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles", (string)null);
+                });
+
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.SecuenciaCompra", b =>
+                {
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<long>("UltimoNumero")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.HasKey("EmpresaId");
+
+                    b.ToTable("SecuenciasCompra", (string)null);
                 });
 
             modelBuilder.Entity("AlmacenCloud.Domain.Entities.SecuenciaVenta", b =>
@@ -700,6 +868,63 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.Compra", b =>
+                {
+                    b.HasOne("AlmacenCloud.Domain.Entities.Almacen", "Almacen")
+                        .WithMany()
+                        .HasForeignKey("AlmacenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AlmacenCloud.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("AnuladoPorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AlmacenCloud.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AlmacenCloud.Domain.Entities.Proveedor", "Proveedor")
+                        .WithMany()
+                        .HasForeignKey("ProveedorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AlmacenCloud.Domain.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Almacen");
+
+                    b.Navigation("Proveedor");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.CompraDetalle", b =>
+                {
+                    b.HasOne("AlmacenCloud.Domain.Entities.Compra", "Compra")
+                        .WithMany("Detalles")
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AlmacenCloud.Domain.Entities.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Compra");
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("AlmacenCloud.Domain.Entities.Inventario", b =>
                 {
                     b.HasOne("AlmacenCloud.Domain.Entities.Almacen", "Almacen")
@@ -733,6 +958,11 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("AlmacenCloud.Domain.Entities.Compra", "Compra")
+                        .WithMany()
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AlmacenCloud.Domain.Entities.Empresa", null)
                         .WithMany()
                         .HasForeignKey("EmpresaId")
@@ -757,6 +987,8 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Almacen");
+
+                    b.Navigation("Compra");
 
                     b.Navigation("Producto");
 
@@ -783,6 +1015,15 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("AlmacenCloud.Domain.Entities.Proveedor", b =>
+                {
+                    b.HasOne("AlmacenCloud.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.SecuenciaCompra", b =>
                 {
                     b.HasOne("AlmacenCloud.Domain.Entities.Empresa", null)
                         .WithMany()
@@ -884,6 +1125,11 @@ namespace AlmacenCloud.Infrastructure.Persistence.Migrations
                     b.Navigation("Producto");
 
                     b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("AlmacenCloud.Domain.Entities.Compra", b =>
+                {
+                    b.Navigation("Detalles");
                 });
 
             modelBuilder.Entity("AlmacenCloud.Domain.Entities.Empresa", b =>

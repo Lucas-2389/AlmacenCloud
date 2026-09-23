@@ -28,6 +28,7 @@ public sealed class Producto
     public decimal PrecioVenta { get; private set; }
     public decimal StockMinimo { get; private set; }
     public bool AfectoIgv { get; private set; }
+    public string? ImagenUrl { get; private set; }
     public bool Activo { get; private set; }
     public DateTime CreadoEn { get; private set; }
     public DateTime ActualizadoEn { get; private set; }
@@ -45,6 +46,15 @@ public sealed class Producto
     }
 
     public void Deactivate() { Activo = false; ActualizadoEn = DateTime.UtcNow; }
+
+    public void SetImage(string imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl)) throw new ArgumentException("La URL de imagen es obligatoria.", nameof(imageUrl));
+        ImagenUrl = imageUrl.Trim();
+        ActualizadoEn = DateTime.UtcNow;
+    }
+
+    public void RemoveImage() { ImagenUrl = null; ActualizadoEn = DateTime.UtcNow; }
 
     private void Apply(Guid categoriaId, string codigo, string nombre, string? descripcion, UnidadMedida unidadMedida,
         decimal precioCompra, decimal precioVenta, decimal stockMinimo, bool afectoIgv)

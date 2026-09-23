@@ -9,6 +9,29 @@ namespace AlmacenCloud.IntegrationTests;
 public sealed class InventoryCoreTests(AlmacenCloudApiFactory factory) : IClassFixture<AlmacenCloudApiFactory>
 {
     [Fact]
+    public async Task ProductImage_CanBeUploadedAndRemoved()
+    {
+        var tenant = await TenantClient("20333333333", "images@test.com");
+        var category = await Create(tenant.Client, "/api/v1/categorias", new { nombre = "Productos con foto", descripcion = "Prueba" });
+        var product = await Create(tenant.Client, "/api/v1/productos", Product(category.GetProperty("id").GetGuid(), "IMG-001", "Producto con imagen"));
+        var productId = product.GetProperty("id").GetGuid();
+
+        using var form = new MultipartFormDataContent();
+        using var image = new ByteArrayContent([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+        image.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        form.Add(image, "imagen", "producto.png");
+
+        var upload = await tenant.Client.PostAsync($"/api/v1/productos/{productId}/imagen", form);
+        Assert.Equal(HttpStatusCode.OK, upload.StatusCode);
+        var imageUrl = (await Read(upload)).GetProperty("imagenUrl").GetString();
+        Assert.StartsWith("/uploads/productos/", imageUrl);
+
+        var delete = await tenant.Client.DeleteAsync($"/api/v1/productos/{productId}/imagen");
+        Assert.Equal(HttpStatusCode.OK, delete.StatusCode);
+        Assert.Equal(JsonValueKind.Null, (await Read(delete)).GetProperty("imagenUrl").ValueKind);
+    }
+
+    [Fact]
     public async Task InventoryCore_RespectsTenantStockTransferAuditAndConcurrency()
     {
         var clientA = await TenantClient("20111111111", "inventory.a@test.com");

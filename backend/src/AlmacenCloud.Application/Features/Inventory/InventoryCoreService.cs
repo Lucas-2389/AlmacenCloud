@@ -6,7 +6,8 @@ using AlmacenCloud.Domain.Enums;
 
 namespace AlmacenCloud.Application.Features.Inventory;
 
-public sealed class InventoryCoreService(IInventoryCoreRepository repository, ICurrentUser currentUser) : IInventoryCoreService
+public sealed class InventoryCoreService(IInventoryCoreRepository repository, ICurrentUser currentUser,
+    IProductImageStorage imageStorage) : IInventoryCoreService
 {
     private const int MaxConcurrencyAttempts = 4;
 
@@ -79,6 +80,40 @@ public sealed class InventoryCoreService(IInventoryCoreRepository repository, IC
         var entity = await Product(id, ct);
         entity.Deactivate();
         await repository.SaveChangesAsync(ct);
+    }
+
+    public async Task<ProductoResponse> UploadProductoImageAsync(Guid id, Stream content, string fileName,
+        string contentType, long length, CancellationToken ct)
+    {
+        const long maxBytes = 5 * 1024 * 1024;
+        if (length <= 0 || length > maxBytes) throw new ValidationException("La imagen debe pesar entre 1 byte y 5 MB.");
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+        var allowed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [".jpg"] = "image/jpeg", [".jpeg"] = "image/jpeg", [".png"] = "image/png", [".webp"] = "image/webp"
+        };
+        if (!allowed.TryGetValue(extension, out var expectedType) || !string.Equals(contentType, expectedType, StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("Solo se permiten imágenes JPG, PNG o WEBP.");
+
+        var product = await Product(id, ct);
+        var previous = product.ImagenUrl;
+        var imageUrl = await imageStorage.SaveAsync(Tenant(), product.Id, content, extension, ct);
+        product.SetImage(imageUrl);
+        await repository.SaveChangesAsync(ct);
+        await imageStorage.DeleteAsync(previous, ct);
+        repository.ClearTracking();
+        return Map(await Product(id, ct));
+    }
+
+    public async Task<ProductoResponse> DeleteProductoImageAsync(Guid id, CancellationToken ct)
+    {
+        var product = await Product(id, ct);
+        var previous = product.ImagenUrl;
+        product.RemoveImage();
+        await repository.SaveChangesAsync(ct);
+        await imageStorage.DeleteAsync(previous, ct);
+        repository.ClearTracking();
+        return Map(await Product(id, ct));
     }
 
     public async Task<IReadOnlyCollection<AlmacenResponse>> GetAlmacenesAsync(CancellationToken ct) =>
@@ -250,10 +285,10 @@ public sealed class InventoryCoreService(IInventoryCoreRepository repository, IC
 
     private static CategoriaResponse Map(Categoria x) => new(x.Id, x.Nombre, x.Descripcion, x.Activo);
     private static ProductoResponse Map(Producto x) => new(x.Id, x.CategoriaId, x.Categoria.Nombre, x.Codigo, x.Nombre, x.Descripcion,
-        x.UnidadMedida, x.PrecioCompra, x.PrecioVenta, x.StockMinimo, x.AfectoIgv, x.Activo);
+        x.UnidadMedida, x.PrecioCompra, x.PrecioVenta, x.StockMinimo, x.AfectoIgv, x.Activo, x.ImagenUrl);
     private static AlmacenResponse Map(Almacen x) => new(x.Id, x.Codigo, x.Nombre, x.Direccion, x.Activo);
     private static InventarioResponse Map(Inventario x) => new(x.Id, x.AlmacenId, x.Almacen.Nombre, x.ProductoId, x.Producto.Codigo,
         x.Producto.Nombre, x.Cantidad, x.Producto.StockMinimo, x.Cantidad <= x.Producto.StockMinimo, x.Version, x.ActualizadoEn);
     private static MovimientoResponse Map(MovimientoInventario x) => new(x.Id, x.AlmacenId, x.ProductoId, x.UsuarioId, x.TipoMovimiento,
-        x.Cantidad, x.StockAnterior, x.StockPosterior, x.Motivo, x.Referencia, x.TransferenciaId, x.VentaId, x.CreadoEn);
+        x.Cantidad, x.StockAnterior, x.StockPosterior, x.Motivo, x.Referencia, x.TransferenciaId, x.VentaId, x.CompraId, x.CreadoEn);
 }
